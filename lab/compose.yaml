@@ -1,0 +1,45 @@
+services:
+  router-a:
+    image: hybrid-router:1.0
+    container_name: router-a
+    hostname: router-a
+    privileged: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      lan-a:
+        ipv4_address: 10.10.10.2
+      transit:
+        ipv4_address: 10.10.20.2
+
+  router-b:
+    image: hybrid-router:1.0
+    container_name: router-b
+    hostname: router-b
+    privileged: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      lan-b:
+        ipv4_address: 10.40.0.2
+      transit:
+        ipv4_address: 10.10.20.3
+
+networks:
+  lan-a:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24
+
+  lan-b:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.40.0.0/24
+
+  transit:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.20.0/24

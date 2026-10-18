@@ -1,0 +1,11 @@
+
+IPv4 Unicast Summary (VRF default):
+BGP router identifier 10.40.0.2, local AS number 65020 vrf-id 0
+BGP table version 2
+RIB entries 3, using 576 bytes of memory
+Peers 1, using 724 KiB of memory
+
+Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+10.10.20.2      4      65010        73        71        0    0    0 01:04:05            1        1 N/A
+
+Total number of neighbors 1
