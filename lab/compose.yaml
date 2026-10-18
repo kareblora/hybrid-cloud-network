@@ -1,11 +1,17 @@
 services:
   router-a:
-    image: hybrid-router:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hybrid-router:1.1
     container_name: router-a
     hostname: router-a
+    init: true
     privileged: true
     sysctls:
       net.ipv4.ip_forward: "1"
+    volumes:
+      - ./frr/router-a/frr.conf:/etc/frr/frr.conf:ro
     networks:
       lan-a:
         ipv4_address: 10.10.10.2
@@ -13,12 +19,18 @@ services:
         ipv4_address: 10.10.20.2
 
   router-b:
-    image: hybrid-router:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hybrid-router:1.1
     container_name: router-b
     hostname: router-b
+    init: true
     privileged: true
     sysctls:
       net.ipv4.ip_forward: "1"
+    volumes:
+      - ./frr/router-b/frr.conf:/etc/frr/frr.conf:ro
     networks:
       lan-b:
         ipv4_address: 10.40.0.2

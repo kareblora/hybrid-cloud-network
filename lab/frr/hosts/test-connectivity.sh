@@ -20,3 +20,7 @@ docker exec host-b apk add --no-cache iputils
 # Configuring static routes in host containers to reach each other through the routers
 docker exec host-a ip route add 10.40.0.0/24 via 10.10.10.2
 docker exec host-b ip route add 10.10.10.0/24 via 10.40.0.2
+
+
+docker exec host-a ping -c 4 10.40.0.10
+docker exec host-b ping -c 4 10.10.10.10

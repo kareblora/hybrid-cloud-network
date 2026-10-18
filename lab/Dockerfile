@@ -14,10 +14,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     procps \
     curl \
     ca-certificates \
+    tini \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Zebra and BGP for the router containers.
-RUN sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons
+RUN sed -i \
+    -e 's/^zebra=no/zebra=yes/' \
+    -e 's/^bgpd=no/bgpd=yes/' \
+    /etc/frr/daemons
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
