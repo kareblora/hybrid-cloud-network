@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     frr \
     frr-pythontools \
     strongswan-starter \
+    strongswan-charon \ 
+    strongswan-swanctl \
     iproute2 \
     iputils-ping \
     tcpdump \
@@ -14,7 +16,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     procps \
     curl \
     ca-certificates \
-    tini \
     && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i \

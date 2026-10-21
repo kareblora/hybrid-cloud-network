@@ -3,15 +3,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: hybrid-router:1.1
+    image: hybrid-router:1.2
     container_name: router-a
     hostname: router-a
     init: true
     privileged: true
     sysctls:
       net.ipv4.ip_forward: "1"
+    environment:
+      UNDERLAY_IF: eth1
+      XFRM_IF: ipsec0
+      XFRM_ID: "42"
+      XFRM_ADDR: 169.254.100.1/30
+      IPSEC_CONNECTION: router-a-to-b
+      IPSEC_CHILD: routed-tunnel    
     volumes:
-      - ./frr/router-a/frr.conf:/etc/frr/frr.conf:ro
+      - ./ipsec/router-a/frr.conf:/etc/frr/frr.conf:ro
+      - ./ipsec/router-a/swanctl.conf:/etc/swanctl/swanctl.conf:ro
     networks:
       lan-a:
         ipv4_address: 10.10.10.2
@@ -22,15 +30,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: hybrid-router:1.1
+    image: hybrid-router:1.2
     container_name: router-b
     hostname: router-b
     init: true
     privileged: true
     sysctls:
       net.ipv4.ip_forward: "1"
+    environment:
+      UNDERLAY_IF: eth0
+      XFRM_IF: ipsec0
+      XFRM_ID: "42"
+      XFRM_ADDR: 169.254.100.2/30
+      IPSEC_CONNECTION: router-b-to-a
+      IPSEC_CHILD: routed-tunnel
     volumes:
-      - ./frr/router-b/frr.conf:/etc/frr/frr.conf:ro
+      - ./ipsec/router-b/frr.conf:/etc/frr/frr.conf:ro
+      - ./ipsec/router-b/swanctl.conf:/etc/swanctl/swanctl.conf:ro
     networks:
       lan-b:
         ipv4_address: 10.40.0.2
