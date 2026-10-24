@@ -5,7 +5,21 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
-: "${UNDERLAY_IF:?UNDERLAY_IF must be set}"
+: "${UNDERLAY_ADDR:?UNDERLAY_ADDR must be set}"
+
+UNDERLAY_IF="$(ip -o -4 addr show |
+    awk -v addr="$UNDERLAY_ADDR" '
+        $4 ~ ("^" addr "/") { print $2; exit }
+    ')"
+
+if [ -z "$UNDERLAY_IF" ]; then
+    log "ERROR: No interface has underlay address $UNDERLAY_ADDR"
+    exit 1
+fi
+
+log "Resolved underlay address $UNDERLAY_ADDR to interface $UNDERLAY_IF"
+
+
 : "${XFRM_IF:=ipsec0}"
 : "${XFRM_ID:=42}"
 : "${XFRM_ADDR:?XFRM_ADDR must be set}"
@@ -18,13 +32,22 @@ if ! ip link show dev "$UNDERLAY_IF" >/dev/null 2>&1; then
     exit 1
 fi
 
-# Create the XFRM interface only if it does not already exist.
+# Ensure the XFRM interface uses the resolved underlay.
+if ip link show dev "$XFRM_IF" >/dev/null 2>&1; then
+    CURRENT_PARENT="$(ip -d link show dev "$XFRM_IF" |
+        sed -n 's/.*@\([^:]*\):.*/\1/p')"
+
+    if [ "$CURRENT_PARENT" != "$UNDERLAY_IF" ]; then
+        log "XFRM parent mismatch: $CURRENT_PARENT; expected $UNDERLAY_IF"
+        log "Removing existing XFRM interface $XFRM_IF"
+        ip link delete "$XFRM_IF"
+    fi
+fi
+
 if ! ip link show dev "$XFRM_IF" >/dev/null 2>&1; then
-    log "Creating XFRM interface $XFRM_IF (ID $XFRM_ID)"
+    log "Creating XFRM interface $XFRM_IF (ID $XFRM_ID) on $UNDERLAY_IF"
     ip link add "$XFRM_IF" type xfrm \
         if_id "$XFRM_ID" dev "$UNDERLAY_IF"
-else
-    log "XFRM interface $XFRM_IF already exists"
 fi
 
 # Configure its address and bring it up.
